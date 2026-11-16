@@ -126,8 +126,23 @@
                 </div>
             </div>
 
+            <!-- PENTAS PRATONTON PERTEMPURAN LOBI (KAPTEN UNIVERSE VS DRAKONIX) -->
+            <div id="lobby-battle-wrapper" class="relative w-full flex-1 min-h-[115px] max-h-[165px] bg-slate-950/90 rounded-2xl border border-sky-500/35 overflow-hidden shadow-inner flex items-center justify-center">
+                <canvas id="lobby-battle-canvas" class="w-full h-full block"></canvas>
+                <div class="absolute top-2 left-2.5 flex items-center gap-1.5 bg-slate-900/85 border border-sky-400/30 px-2 py-0.5 rounded-full text-[10px] font-bold text-sky-300 pointer-events-none">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>SIMULASI TEMPUR LANGSUNG</span>
+                </div>
+                <div class="absolute bottom-1.5 left-3 text-[10px] font-fun font-bold text-sky-300/90 pointer-events-none">
+                    🦸 Kapten Universe
+                </div>
+                <div class="absolute bottom-1.5 right-3 text-[10px] font-fun font-bold text-rose-400/90 pointer-events-none">
+                    👾 Drakonix
+                </div>
+            </div>
+
             <!-- Langkah 2: Pilih Topik Misi (Terus Mula Bila Klik) -->
-            <div class="flex-1 flex flex-col justify-center">
+            <div class="flex flex-col justify-center shrink-0">
                 <div class="flex items-center justify-between mb-2 px-1">
                     <span class="text-xs font-bold text-slate-300">Pilih Topik Misi</span>
                     <span class="text-[11px] text-slate-400">Tekan topik untuk mula</span>
@@ -679,7 +694,249 @@
             });
         }
 
+        // Pentas Pratonton Pertempuran Lobi (Kapten Universe vs Drakonix)
+        function initLobbyShowcase() {
+            const canvas = document.getElementById('lobby-battle-canvas');
+            const wrapper = document.getElementById('lobby-battle-wrapper');
+            if (!canvas || !wrapper) return;
+            const ctx = canvas.getContext('2d');
+
+            function resizeLobbyCanvas() {
+                if (wrapper.clientWidth > 0 && wrapper.clientHeight > 0) {
+                    canvas.width = wrapper.clientWidth;
+                    canvas.height = wrapper.clientHeight;
+                }
+            }
+            resizeLobbyCanvas();
+            window.addEventListener('resize', resizeLobbyCanvas);
+
+            let lobbyLasers = [];
+            let lobbyParticles = [];
+            let shootTimer = 0.8;
+            let hitAlienFlash = 0;
+            let hitHeroFlash = 0;
+            let heroTurn = true;
+            let lastTime = performance.now();
+
+            function renderLobby(now) {
+                const dt = Math.min((now - lastTime) / 1000, 0.1);
+                lastTime = now;
+
+                if (!document.getElementById('screen-home').classList.contains('hidden')) {
+                    if (canvas.width !== wrapper.clientWidth || canvas.height !== wrapper.clientHeight) {
+                        resizeLobbyCanvas();
+                    }
+
+                    const w = canvas.width || 360;
+                    const h = canvas.height || 130;
+                    const groundY = h - 22;
+                    const heroX = 56;
+                    const alienX = w - 58;
+                    const baseCharY = groundY - 26;
+                    // Pergerakan atas dan bawah yang lebih dinamik untuk kedua-dua watak
+                    const heroY = baseCharY - 6 + Math.sin(now * 0.0055) * 14;
+                    const alienY = baseCharY - 8 + Math.cos(now * 0.0068) * 16;
+
+                    if (hitAlienFlash > 0) hitAlienFlash -= dt;
+                    if (hitHeroFlash > 0) hitHeroFlash -= dt;
+
+                    shootTimer -= dt;
+                    if (shootTimer <= 0) {
+                        // Tembakan bertalu-talu yang jauh lebih pantas
+                        shootTimer = 0.32 + Math.random() * 0.25;
+                        const isHeroShot = heroTurn;
+                        lobbyLasers.push({
+                            x: isHeroShot ? heroX + 24 : alienX - 24,
+                            y: isHeroShot ? heroY - 3 : alienY - 3,
+                            targetX: isHeroShot ? alienX - 20 : heroX + 18,
+                            targetY: isHeroShot ? alienY - 3 : heroY - 3,
+                            color: isHeroShot ? '#38bdf8' : '#f43f5e',
+                            isHero: isHeroShot,
+                            progress: 0
+                        });
+                        // Kadangkala lepaskan tembakan berganda (double shot)
+                        if (Math.random() < 0.4) {
+                            lobbyLasers.push({
+                                x: isHeroShot ? heroX + 22 : alienX - 22,
+                                y: (isHeroShot ? heroY : alienY) + 5,
+                                targetX: isHeroShot ? alienX - 20 : heroX + 18,
+                                targetY: (isHeroShot ? alienY : heroY) + 5,
+                                color: isHeroShot ? '#facc15' : '#fb7185',
+                                isHero: isHeroShot,
+                                progress: -0.15
+                            });
+                        }
+                        heroTurn = !heroTurn;
+                    }
+
+                    ctx.clearRect(0, 0, w, h);
+
+                    // Latar lantai planet & bintang bergerak laju
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillRect(0, groundY, w, 22);
+                    ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(0, groundY);
+                    ctx.lineTo(w, groundY);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#e0f2fe';
+                    for (let i = 0; i < 16; i++) {
+                        const px = (i * 53 + now * 0.035) % w;
+                        const py = (i * 19) % (groundY - 10);
+                        ctx.globalAlpha = 0.25 + 0.55 * Math.sin(now * 0.008 + i);
+                        ctx.fillRect(px, py, 2, 2);
+                    }
+                    ctx.globalAlpha = 1;
+
+                    // Lukis Kapten Universe (Kiri - Bergerak atas & bawah)
+                    ctx.save();
+                    ctx.translate(heroX, heroY);
+                    ctx.scale(0.85, 0.85);
+                    ctx.fillStyle = hitHeroFlash > 0 ? '#ffffff' : '#ef4444';
+                    ctx.beginPath();
+                    ctx.moveTo(-6, -12);
+                    ctx.quadraticCurveTo(-26, 2 + Math.sin(now * 0.025) * 7, -32, 22);
+                    ctx.lineTo(-8, 16);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = hitHeroFlash > 0 ? '#ffffff' : '#1d4ed8';
+                    ctx.fillRect(-8, 12, 6, 14);
+                    ctx.fillRect(2, 12, 6, 14);
+                    ctx.fillStyle = hitHeroFlash > 0 ? '#ffffff' : '#0284c7';
+                    ctx.beginPath();
+                    ctx.roundRect(-10, -12, 20, 24, 5);
+                    ctx.fill();
+                    ctx.fillStyle = '#facc15';
+                    ctx.beginPath();
+                    ctx.moveTo(2, -7); ctx.lineTo(-3, 0); ctx.lineTo(1, 0);
+                    ctx.lineTo(-2, 7); ctx.lineTo(5, -1); ctx.lineTo(1, -1);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.fillRect(8, -7, 17, 6);
+                    ctx.fillStyle = '#fef08a';
+                    ctx.beginPath();
+                    ctx.arc(26, -4, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#fde68a';
+                    ctx.beginPath();
+                    ctx.arc(0, -20, 9.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#1e3a8a';
+                    ctx.fillRect(-8, -24, 18, 5.5);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(2, -23, 4.5, 2.5);
+                    ctx.restore();
+
+                    // Lukis Drakonix (Kanan - Bergerak atas & bawah)
+                    const recoil = hitAlienFlash > 0 ? 6 : 0;
+                    ctx.save();
+                    ctx.translate(alienX + recoil, alienY);
+                    ctx.scale(0.85, 0.85);
+                    ctx.strokeStyle = hitAlienFlash > 0 ? '#ffffff' : '#f43f5e';
+                    ctx.lineWidth = 3.5;
+                    ctx.beginPath();
+                    ctx.moveTo(-9, -22); ctx.lineTo(-16, -35);
+                    ctx.moveTo(9, -22); ctx.lineTo(16, -35);
+                    ctx.stroke();
+                    ctx.fillStyle = '#facc15';
+                    ctx.beginPath();
+                    ctx.arc(-16, -35, 3.5, 0, Math.PI * 2);
+                    ctx.arc(16, -35, 3.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = hitAlienFlash > 0 ? '#ffffff' : '#f43f5e';
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 22, 25, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = hitAlienFlash > 0 ? '#ffffff' : '#f43f5e';
+                    ctx.lineWidth = 5;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(-16, 2);
+                    ctx.lineTo(-30, -4 + Math.sin(now * 0.012) * 3.5);
+                    ctx.stroke();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(-5, -7, 9, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#0f172a';
+                    ctx.beginPath();
+                    ctx.arc(-8, -7, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#4c0519';
+                    ctx.beginPath();
+                    ctx.ellipse(-4, 11, 11, 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = hitAlienFlash > 0 ? '#ffffff' : '#f43f5e';
+                    ctx.fillRect(-14, 20, 7, 9);
+                    ctx.fillRect(5, 20, 7, 9);
+                    ctx.restore();
+                    // Laser & Bola Tenaga (Kelajuan peluru dipertingkatkan)
+                    for (let i = lobbyLasers.length - 1; i >= 0; i--) {
+                        const l = lobbyLasers[i];
+                        l.progress += dt * 5.8;
+                        if (l.progress < 0) continue;
+                        const cx = l.x + (l.targetX - l.x) * l.progress;
+                        const cy = l.y + (l.targetY - l.y) * l.progress;
+
+                        ctx.strokeStyle = l.color;
+                        ctx.lineWidth = 4;
+                        ctx.lineCap = 'round';
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = l.color;
+                        ctx.beginPath();
+                        ctx.moveTo(cx - (l.isHero ? 18 : -18), cy);
+                        ctx.lineTo(cx, cy);
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+
+                        if (l.progress >= 1) {
+                            if (l.isHero) hitAlienFlash = 0.12;
+                            else hitHeroFlash = 0.12;
+                            for (let p = 0; p < 12; p++) {
+                                const ang = Math.random() * Math.PI * 2;
+                                const spd = Math.random() * 85 + 25;
+                                lobbyParticles.push({
+                                    x: l.targetX,
+                                    y: l.targetY,
+                                    vx: Math.cos(ang) * spd,
+                                    vy: Math.sin(ang) * spd,
+                                    life: 1,
+                                    color: l.color
+                                });
+                            }
+                            lobbyLasers.splice(i, 1);
+                        }
+                    }
+
+                    // Zarah Letupan
+                    for (let i = lobbyParticles.length - 1; i >= 0; i--) {
+                        const pt = lobbyParticles[i];
+                        pt.x += pt.vx * dt;
+                        pt.y += pt.vy * dt;
+                        pt.life -= dt * 3.5;
+                        if (pt.life <= 0) {
+                            lobbyParticles.splice(i, 1);
+                            continue;
+                        }
+                        ctx.globalAlpha = pt.life;
+                        ctx.fillStyle = pt.color;
+                        ctx.beginPath();
+                        ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.globalAlpha = 1;
+                }
+
+                requestAnimationFrame(renderLobby);
+            }
+            requestAnimationFrame(renderLobby);
+        }
+
         initLobbySpaceBackground();
+        initLobbyShowcase();
         updateLobbyHUD();
 
         function setDifficulty(level) {
