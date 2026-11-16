@@ -42,16 +42,16 @@
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-2 sm:p-4 text-slate-100 overflow-x-hidden">
+<body class="flex flex-col items-center justify-center min-h-[100dvh] p-0 sm:p-4 text-slate-100 overflow-x-hidden">
 
     <!-- KANVAS LATAR BELAKANG ANGKASA LEPAS -->
     <canvas id="space-bg-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
 
-    <!-- KONTENA UTAMA APLIKASI (DISEMPURNAKAN KEDUDUKANNYA) -->
-    <div id="app-container" class="relative z-10 w-full max-w-md bg-slate-900/95 backdrop-blur-xl rounded-3xl shadow-2xl border-2 border-sky-400/40 overflow-hidden flex flex-col my-auto">
+    <!-- KONTENA UTAMA APLIKASI (MESRA SKRIN PENUH TELEFON PINTAR) -->
+    <div id="app-container" class="relative z-10 w-full max-w-md min-h-[100dvh] sm:min-h-[680px] sm:max-h-[92dvh] bg-slate-900/95 backdrop-blur-xl rounded-none sm:rounded-3xl shadow-2xl border-0 sm:border-2 border-sky-400/40 overflow-y-auto flex flex-col justify-between">
         
         <!-- BAR HUD ATAS -->
-        <header class="bg-slate-950/90 text-white px-4 py-3 border-b border-sky-500/30 flex items-center justify-between gap-2">
+        <header class="bg-slate-950/90 text-white px-4 py-3 border-b border-sky-500/30 flex items-center justify-between gap-2 shrink-0">
             <div class="flex items-center gap-2.5 min-w-0">
                 <div class="w-9 h-9 rounded-xl bg-sky-500/20 border border-sky-400/50 flex items-center justify-center text-lg shrink-0">
                     🚀
@@ -91,10 +91,10 @@
         </header>
 
         <!-- SKRIN 1: HALAMAN UTAMA (LOBI KEMAS & TERATUR) -->
-        <main id="screen-home" class="p-4 sm:p-5 flex flex-col gap-4 animate-pop">
+        <main id="screen-home" class="flex-1 p-4 sm:p-5 flex flex-col justify-between gap-4 animate-pop">
             
             <!-- Tajuk Utama -->
-            <div class="text-center pt-1">
+            <div class="text-center pt-2">
                 <div class="inline-flex items-center gap-1.5 bg-sky-500/15 border border-sky-400/30 px-3 py-1 rounded-full text-[11px] font-bold text-sky-300 mb-2">
                     <span>👾</span>
                     <span>Permainan Matematik Interaktif</span>
@@ -127,7 +127,7 @@
             </div>
 
             <!-- Langkah 2: Pilih Topik Misi (Terus Mula Bila Klik) -->
-            <div>
+            <div class="flex-1 flex flex-col justify-center">
                 <div class="flex items-center justify-between mb-2 px-1">
                     <span class="text-xs font-bold text-slate-300">Pilih Topik Misi</span>
                     <span class="text-[11px] text-slate-400">Tekan topik untuk mula</span>
@@ -198,10 +198,10 @@
         </main>
 
         <!-- SKRIN 2: ARENA PERTEMPURAN -->
-        <section id="screen-game" class="hidden p-3 sm:p-4 flex flex-col gap-2 sci-fi-grid">
+        <section id="screen-game" class="hidden flex-1 p-3 sm:p-4 flex flex-col justify-between gap-2.5 sci-fi-grid">
             
             <!-- Info Wave, Butang Kembali & Bintang -->
-            <div class="flex items-center justify-between text-xs gap-1.5">
+            <div class="flex items-center justify-between text-xs gap-1.5 shrink-0">
                 <div class="flex items-center gap-1.5">
                     <button onclick="goHome()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 transition">
                         <span>←</span>
@@ -216,7 +216,7 @@
             </div>
 
             <!-- Bar HP Kapten Universe vs Makhluk Asing -->
-            <div class="grid grid-cols-2 gap-2 bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+            <div class="grid grid-cols-2 gap-2 bg-slate-950/60 p-2 rounded-xl border border-slate-800 shrink-0">
                 <div>
                     <div class="flex justify-between text-[11px] font-bold text-sky-300 mb-1">
                         <span>🦸 Kapten Universe</span>
@@ -238,15 +238,15 @@
             </div>
 
             <!-- KANVAS ARENA PERTEMPURAN VISUAL PENUH -->
-            <div id="battle-arena-wrapper" class="relative w-full h-40 bg-slate-950 rounded-2xl my-1.5 overflow-hidden border-2 border-sky-400/40 shadow-inner flex items-center justify-center">
+            <div id="battle-arena-wrapper" class="relative w-full flex-1 min-h-[165px] max-h-[260px] bg-slate-950 rounded-2xl my-1 overflow-hidden border-2 border-sky-400/40 shadow-inner flex items-center justify-center">
                 <canvas id="battle-canvas" class="w-full h-full block"></canvas>
-                <div id="battle-msg" class="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[11px] font-fun font-bold px-3 py-0.5 rounded-full bg-black/80 text-amber-300 border border-amber-400/50 pointer-events-none shadow">
+                <div id="battle-msg" class="absolute bottom-2 left-1/2 -translate-x-1/2 text-[11px] font-fun font-bold px-3 py-0.5 rounded-full bg-black/80 text-amber-300 border border-amber-400/50 pointer-events-none shadow whitespace-nowrap">
                     Tembak musuh dengan jawapan betul!
                 </div>
             </div>
 
             <!-- KAD SOALAN -->
-            <div class="w-full bg-slate-900/90 border border-sky-500/30 rounded-2xl p-2.5 shadow-sm flex flex-col gap-1.5">
+            <div class="w-full bg-slate-900/90 border border-sky-500/30 rounded-2xl p-3 shadow-sm flex flex-col gap-2 shrink-0">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-1.5">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Soalan</span>
@@ -276,24 +276,24 @@
             </div>
 
             <!-- PILIHAN JAWAPAN A B C D -->
-            <div class="grid grid-cols-2 gap-2 mt-1">
-                <button onclick="checkAnswer(0)" id="ans-0" class="btn-3d bg-slate-900 hover:bg-slate-800 text-white font-fun font-bold text-base py-2.5 px-3 rounded-2xl border-b-4 border-slate-950 transition flex items-center justify-center border border-slate-700">
+            <div class="grid grid-cols-2 gap-2.5 mt-1 pb-1 shrink-0">
+                <button onclick="checkAnswer(0)" id="ans-0" class="btn-3d bg-slate-900 hover:bg-slate-800 text-white font-fun font-bold text-base py-3.5 px-3 rounded-2xl border-b-4 border-slate-950 transition flex items-center justify-center border border-slate-700">
                     <span class="opacity-60 text-xs mr-2 font-mono text-sky-400">A.</span> <span class="ans-val">20</span>
                 </button>
-                <button onclick="checkAnswer(1)" id="ans-1" class="btn-3d bg-slate-900 hover:bg-slate-800 text-white font-fun font-bold text-base py-2.5 px-3 rounded-2xl border-b-4 border-slate-950 transition flex items-center justify-center border border-slate-700">
+                <button onclick="checkAnswer(1)" id="ans-1" class="btn-3d bg-slate-900 hover:bg-slate-800 text-white font-fun font-bold text-base py-3.5 px-3 rounded-2xl border-b-4 border-slate-950 transition flex items-center justify-center border border-slate-700">
                     <span class="opacity-60 text-xs mr-2 font-mono text-sky-400">B.</span> <span class="ans-val">22</span>
                 </button>
-                <button onclick="checkAnswer(2)" id="ans-2" class="btn-3d bg-slate-900 hover:bg-slate-800 text-white font-fun font-bold text-base py-2.5 px-3 rounded-2xl border-b-4 border-slate-950 transition flex items-center justify-center border border-slate-700">
+                <button onclick="checkAnswer(2)" id="ans-2" class="btn-3d bg-slate-900 hover:bg-slate-800 text-white font-fun font-bold text-base py-3.5 px-3 rounded-2xl border-b-4 border-slate-950 transition flex items-center justify-center border border-slate-700">
                     <span class="opacity-60 text-xs mr-2 font-mono text-sky-400">C.</span> <span class="ans-val">18</span>
                 </button>
-                <button onclick="checkAnswer(3)" id="ans-3" class="btn-3d bg-slate-900 hover:bg-slate-800 text-white font-fun font-bold text-base py-2.5 px-3 rounded-2xl border-b-4 border-slate-950 transition flex items-center justify-center border border-slate-700">
+                <button onclick="checkAnswer(3)" id="ans-3" class="btn-3d bg-slate-900 hover:bg-slate-800 text-white font-fun font-bold text-base py-3.5 px-3 rounded-2xl border-b-4 border-slate-950 transition flex items-center justify-center border border-slate-700">
                     <span class="opacity-60 text-xs mr-2 font-mono text-sky-400">D.</span> <span class="ans-val">24</span>
                 </button>
             </div>
         </section>
 
         <!-- SKRIN 3: KEPUTUSAN / GAME OVER -->
-        <section id="screen-end" class="hidden p-5 flex flex-col items-center text-center gap-4 animate-pop">
+        <section id="screen-end" class="hidden flex-1 p-5 flex flex-col items-center justify-center text-center gap-4 animate-pop">
             <div class="w-20 h-20 rounded-full bg-amber-400/20 border-2 border-amber-400 flex items-center justify-center text-4xl mb-1">
                 🏆
             </div>
@@ -324,7 +324,7 @@
         </section>
 
         <!-- SKRIN 4: CELEBRATE NAIK PANGKAT (RANK UP) -->
-        <section id="screen-rankup" class="hidden p-5 flex flex-col items-center text-center gap-4 animate-pop bg-gradient-to-b from-indigo-950/90 via-slate-900 to-slate-950">
+        <section id="screen-rankup" class="hidden flex-1 p-5 flex flex-col items-center justify-center text-center gap-4 animate-pop bg-gradient-to-b from-indigo-950/90 via-slate-900 to-slate-950">
             <div class="relative">
                 <div class="w-24 h-24 rounded-full bg-amber-400/25 border-2 border-amber-400 flex items-center justify-center text-5xl animate-bounce shadow-lg shadow-amber-500/20">
                     <span id="rankup-badge-icon">⚡</span>
