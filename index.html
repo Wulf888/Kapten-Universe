@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathVenture Universe</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #060913;
+            min-height: 100vh;
+            overscroll-behavior-y: contain;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        h1, h2, h3, .font-fun {
+            font-family: 'Fredoka', cursive, sans-serif;
+        }
+        .btn-3d {
+            transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.45);
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+        }
+        .sci-fi-grid {
+            background-image: linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.25s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-2 sm:p-4 text-slate-100 overflow-x-hidden">
+
+    <!-- KANVAS LATAR BELAKANG ANGKASA LEPAS -->
+    <canvas id="space-bg-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+    <!-- KONTENA UTAMA APLIKASI (DISEMPURNAKAN KEDUDUKANNYA) -->
+    <div id="app-container" class="relative z-10 w-full max-w-md bg-slate-900/95 backdrop-blur-xl rounded-3xl shadow-2xl border-2 border-sky-400/40 overflow-hidden flex flex-col my-auto">
+        
+        <!-- BAR HUD ATAS -->
+        <header class="bg-slate-950/90 text-white px-4 py-3 border-b border-sky-500/30 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-sky-500/20 border border-sky-400/50 flex items-center justify-center text-lg shrink-0">
+                    🚀
+                </div>
+                <div class="min-w-0">
+                    <div id="player-rank" class="font-fun text-xs sm:text-sm font-bold text-sky-300 truncate">
+                        🎖️ REKRUT ANGKASA
+                    </div>
+                    <div class="text-[11px] text-slate-400 font-medium">
+                        Rekod: <strong id="high-wave-hud" class="text-amber-300">Wave 1</strong>
+                    </div>
+                    <!-- Bar Kemajuan Target Naik Pangkat -->
+                    <div class="w-32 sm:w-40 mt-1">
+                        <div class="flex justify-between text-[9px] text-sky-200/80 font-semibold mb-0.5">
+                            <span id="next-rank-label">Target: Koperal</span>
+                            <span id="rank-progress-text">0/20 ⭐</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden border border-sky-500/20">
+                            <div id="rank-progress-bar" class="h-full bg-gradient-to-r from-amber-400 to-sky-400 rounded-full transition-all duration-300" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <div class="flex items-center gap-1 bg-amber-500/15 border border-amber-400/40 px-2.5 py-1 rounded-xl text-amber-300 font-bold text-xs">
+                    <span>⭐</span>
+                    <span id="total-stars">0</span>
+                </div>
+                <button onclick="openResetModal()" title="Reset Level" class="w-9 h-9 bg-slate-800 hover:bg-rose-950/80 text-slate-300 hover:text-rose-400 rounded-xl flex items-center justify-center border border-slate-700 hover:border-rose-500/50 transition">
+                    <span class="text-sm">🔄</span>
+                </button>
+                <button onclick="toggleSound()" id="sound-btn" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl flex items-center justify-center border border-slate-700 transition">
+                    <span id="sound-icon" class="text-base">🔊</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- SKRIN 1: HALAMAN UTAMA (LOBI KEMAS & TERATUR) -->
+        <main id="screen-home" class="p-4 sm:p-5 flex flex-col gap-4 animate-pop">
+            
+            <!-- Tajuk Utama -->
+            <div class="text-center pt-1">
+                <div class="inline-flex items-center gap-1.5 bg-sky-500/15 border border-sky-400/30 px-3 py-1 rounded-full text-[11px] font-bold text-sky-300 mb-2">
+                    <span>👾</span>
+                    <span>Permainan Matematik Interaktif</span>
+                </div>
+                <h1 class="font-fun text-2xl sm:text-3xl font-bold text-white tracking-wide">
+                    MATHVENTURE <span class="text-amber-300">UNIVERSE</span>
+                </h1>
+                <p class="text-slate-400 text-xs mt-1">
+                    Misi Pengembaraan Kapten Universe!
+                </p>
+            </div>
+
+            <!-- Langkah 1: Tahap Kesukaran -->
+            <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-3">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-300">Tahap Kesukaran</span>
+                    <span id="difficulty-spec" class="text-[11px] font-semibold text-emerald-400">Musuh Perlahan</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setDifficulty('mudah')" id="diff-mudah" class="py-2 px-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs shadow text-center">
+                        🌱 Rekrut
+                    </button>
+                    <button onclick="setDifficulty('sederhana')" id="diff-sederhana" class="py-2 px-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold text-xs transition text-center">
+                        ⚡ Koperal
+                    </button>
+                    <button onclick="setDifficulty('sukar')" id="diff-sukar" class="py-2 px-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold text-xs transition text-center">
+                        🔥 Sarjan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Langkah 2: Pilih Topik Misi (Terus Mula Bila Klik) -->
+            <div>
+                <div class="flex items-center justify-between mb-2 px-1">
+                    <span class="text-xs font-bold text-slate-300">Pilih Topik Misi</span>
+                    <span class="text-[11px] text-slate-400">Tekan topik untuk mula</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <button onclick="startGame('tambah')" class="btn-3d bg-slate-800/90 hover:bg-slate-800 border border-emerald-500/30 rounded-2xl p-3 flex flex-col items-start gap-1 text-left">
+                        <div class="flex items-center justify-between w-full">
+                            <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-300 font-fun font-bold text-lg flex items-center justify-center">+</span>
+                            <span id="best-tambah" class="text-[11px] font-semibold text-amber-300">⭐ 0</span>
+                        </div>
+                        <span class="font-fun font-bold text-sm text-white mt-1">Tambah</span>
+                    </button>
+
+                    <button onclick="startGame('tolak')" class="btn-3d bg-slate-800/90 hover:bg-slate-800 border border-rose-500/30 rounded-2xl p-3 flex flex-col items-start gap-1 text-left">
+                        <div class="flex items-center justify-between w-full">
+                            <span class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-300 font-fun font-bold text-lg flex items-center justify-center">−</span>
+                            <span id="best-tolak" class="text-[11px] font-semibold text-amber-300">⭐ 0</span>
+                        </div>
+                        <span class="font-fun font-bold text-sm text-white mt-1">Tolak</span>
+                    </button>
+
+                    <button onclick="startGame('darab')" class="btn-3d bg-slate-800/90 hover:bg-slate-800 border border-amber-500/30 rounded-2xl p-3 flex flex-col items-start gap-1 text-left">
+                        <div class="flex items-center justify-between w-full">
+                            <span class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-300 font-fun font-bold text-lg flex items-center justify-center">×</span>
+                            <span id="best-darab" class="text-[11px] font-semibold text-amber-300">⭐ 0</span>
+                        </div>
+                        <span class="font-fun font-bold text-sm text-white mt-1">Darab</span>
+                    </button>
+
+                    <button onclick="startGame('bahagi')" class="btn-3d bg-slate-800/90 hover:bg-slate-800 border border-sky-500/30 rounded-2xl p-3 flex flex-col items-start gap-1 text-left">
+                        <div class="flex items-center justify-between w-full">
+                            <span class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-300 font-fun font-bold text-lg flex items-center justify-center">÷</span>
+                            <span id="best-bahagi" class="text-[11px] font-semibold text-amber-300">⭐ 0</span>
+                        </div>
+                        <span class="font-fun font-bold text-sm text-white mt-1">Bahagi</span>
+                    </button>
+
+                    <button onclick="startGame('pecahan')" class="btn-3d bg-slate-800/90 hover:bg-slate-800 border border-purple-500/30 rounded-2xl p-3 flex flex-col items-start gap-1 text-left">
+                        <div class="flex items-center justify-between w-full">
+                            <span class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-300 font-fun font-bold text-sm flex items-center justify-center">½</span>
+                            <span id="best-pecahan" class="text-[11px] font-semibold text-amber-300">⭐ 0</span>
+                        </div>
+                        <span class="font-fun font-bold text-sm text-white mt-1">Pecahan</span>
+                    </button>
+
+                    <button onclick="startGame('peratusan')" class="btn-3d bg-slate-800/90 hover:bg-slate-800 border border-teal-500/30 rounded-2xl p-3 flex flex-col items-start gap-1 text-left">
+                        <div class="flex items-center justify-between w-full">
+                            <span class="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-300 font-fun font-bold text-base flex items-center justify-center">%</span>
+                            <span id="best-peratusan" class="text-[11px] font-semibold text-amber-300">⭐ 0</span>
+                        </div>
+                        <span class="font-fun font-bold text-sm text-white mt-1">Peratusan</span>
+                    </button>
+
+                    <!-- Misi Campuran Penuh Lebar -->
+                    <button onclick="startGame('semua')" class="btn-3d col-span-2 bg-gradient-to-r from-indigo-600/80 to-purple-600/80 hover:brightness-110 border border-indigo-400/50 rounded-2xl p-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="w-9 h-9 rounded-xl bg-white/15 text-lg flex items-center justify-center">👑</span>
+                            <div class="text-left">
+                                <div class="font-fun font-bold text-sm text-white">Misi Campuran (Boss Rush)</div>
+                                <div class="text-[11px] text-indigo-200">Gabungan semua 6 topik matematik</div>
+                            </div>
+                        </div>
+                        <span id="best-semua" class="text-xs font-bold text-amber-300 bg-black/30 px-2.5 py-1 rounded-lg">⭐ 0</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- SKRIN 2: ARENA PERTEMPURAN -->
+        <section id="screen-game" class="hidden p-3 sm:p-4 flex flex-col gap-2 sci-fi-grid">
+            
+            <!-- Info Wave, Butang Kembali & Bintang -->
+            <div class="flex items-center justify-between text-xs gap-1.5">
+                <div class="flex items-center gap-1.5">
+                    <button onclick="goHome()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 transition">
+                        <span>←</span>
+                        <span>Menu Asal</span>
+                    </button>
+                    <span id="game-topic-badge" class="bg-sky-500/20 text-sky-300 border border-sky-400/30 font-bold px-2 py-0.5 rounded-full">
+                        TAMBAH
+                    </span>
+                </div>
+                <span id="game-wave-text" class="font-fun font-bold text-amber-300 tracking-wider">WAVE 1</span>
+                <span class="font-bold text-amber-300">⭐ <span id="game-round-stars">0</span></span>
+            </div>
+
+            <!-- Bar HP Kapten Universe vs Makhluk Asing -->
+            <div class="grid grid-cols-2 gap-2 bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                <div>
+                    <div class="flex justify-between text-[11px] font-bold text-sky-300 mb-1">
+                        <span>🦸 Kapten Universe</span>
+                        <span><span id="hero-hp-val">100</span>%</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div id="hero-hp-bar" class="h-full bg-sky-400 rounded-full transition-all duration-300" style="width: 100%;"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-[11px] font-bold text-rose-400 mb-1">
+                        <span id="alien-name-label">👾 Drakonix</span>
+                        <span><span id="alien-hp-val">100</span>%</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div id="alien-hp-bar" class="h-full bg-rose-500 rounded-full transition-all duration-300" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KANVAS ARENA PERTEMPURAN VISUAL PENUH -->
+            <div id="battle-arena-wrapper" class="relative w-full h-40 bg-slate-950 rounded-2xl my-1.5 overflow-hidden border-2 border-sky-400/40 shadow-inner flex items-center justify-center">
+                <canvas id="battle-canvas" class="w-full h-full block"></canvas>
+                <div id="battle-msg" class="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[11px] font-fun font-bold px-3 py-0.5 rounded-full bg-black/80 text-amber-300 border border-amber-400/50 pointer-events-none shadow">
+                    Tembak musuh dengan jawapan betul!
+                </div>
+            </div>
+
+            <!-- KAD SOALAN -->
+            <div class="w-full bg-slate-900/90 border border-sky-500/30 rounded-2xl p-2.5 shadow-sm flex flex-col gap-1.5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Soalan</span>
+                        <span id="q-counter" class="text-xs font-bold text-sky-300 bg-sky-500/20 px-2 py-0.5 rounded-md">1/10</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 w-28">
+                        <span class="text-xs text-slate-400">⏱️</span>
+                        <div class="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="timer-bar" class="h-full bg-amber-400 rounded-full transition-all duration-100" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="question-text" class="font-fun text-2xl sm:text-3xl font-bold text-white text-center py-0.5">
+                    12 + 8 = ?
+                </div>
+
+                <div class="flex justify-center">
+                    <button onclick="toggleHint()" id="hint-btn" class="text-[11px] font-semibold text-sky-300 bg-sky-500/15 hover:bg-sky-500/25 px-3 py-0.5 rounded-full border border-sky-400/30 transition flex items-center gap-1">
+                        <span>💡</span>
+                        <span id="hint-text-label">Buka Tips & Hint</span>
+                    </button>
+                </div>
+                <div id="hint-box" class="hidden text-xs text-slate-200 bg-slate-800/90 border border-amber-400/40 rounded-xl p-2 text-center">
+                    <strong>Tips:</strong> <span id="hint-content">Kumpul nombor sa dahulu...</span>
+                </div>
+            </div>
+
+            <!-- PILIHAN JAWAPAN A B C D -->
+            <div class="grid grid-cols-2 gap-2 mt-1">
+                <button onclick="checkAnswer(0)" id="ans-0" class="btn-3d bg-slate-900 hover:bg-slate-800 text-white font-fun font-bold text-base py-2.5 px-3 rounded-2xl border-b-4 border-slate-950 transition flex items-center justify-center border border-slate-700">
+                    <span class="opacity-60 text-xs mr-2 font-mono text-sky-400">A.</span> <span class="ans-val">20</span>
+                </button>
+                <button onclick="checkAnswer(1)" id="ans-1" class="btn-3d bg-slate-900 hover:bg-slate-800 text-white font-fun font-bold text-base py-2.5 px-3 rounded-2xl border-b-4 border-slate-950 transition flex items-center justify-center border border-slate-700">
+                    <span class="opacity-60 text-xs mr-2 font-mono text-sky-400">B.</span> <span class="ans-val">22</span>
+                </button>
+                <button onclick="checkAnswer(2)" id="ans-2" class="btn-3d bg-slate-900 hover:bg-slate-800 text-white font-fun font-bold text-base py-2.5 px-3 rounded-2xl border-b-4 border-slate-950 transition flex items-center justify-center border border-slate-700">
+                    <span class="opacity-60 text-xs mr-2 font-mono text-sky-400">C.</span> <span class="ans-val">18</span>
+                </button>
+                <button onclick="checkAnswer(3)" id="ans-3" class="btn-3d bg-slate-900 hover:bg-slate-800 text-white font-fun font-bold text-base py-2.5 px-3 rounded-2xl border-b-4 border-slate-950 transition flex items-center justify-center border border-slate-700">
+                    <span class="opacity-60 text-xs mr-2 font-mono text-sky-400">D.</span> <span class="ans-val">24</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- SKRIN 3: KEPUTUSAN / GAME OVER -->
+        <section id="screen-end" class="hidden p-5 flex flex-col items-center text-center gap-4 animate-pop">
+            <div class="w-20 h-20 rounded-full bg-amber-400/20 border-2 border-amber-400 flex items-center justify-center text-4xl mb-1">
+                🏆
+            </div>
+            <div>
+                <h2 id="end-title" class="font-fun text-2xl font-bold text-white">MISI SELESAI!</h2>
+                <p id="end-subtitle" class="text-xs text-slate-300 mt-1">Hebat! Anda berjaya menewaskan gelombang makhluk asing.</p>
+            </div>
+
+            <div class="w-full bg-slate-950/70 border border-slate-800 rounded-2xl p-4 flex flex-col gap-2">
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-400">Gelombang (Wave) Dicapai:</span>
+                    <strong id="end-wave" class="text-sky-300 font-fun">Wave 3</strong>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-400">Bintang Dikumpul:</span>
+                    <strong id="end-stars" class="text-amber-300 font-fun">⭐ 15</strong>
+                </div>
+            </div>
+
+            <div class="flex gap-2 w-full mt-2">
+                <button onclick="restartGame()" class="btn-3d flex-1 bg-sky-500 hover:bg-sky-400 text-slate-950 font-fun font-bold py-3 rounded-xl border-b-4 border-sky-700 transition">
+                    🔄 Main Semula
+                </button>
+                <button onclick="goHome()" class="btn-3d flex-1 bg-slate-800 hover:bg-slate-700 text-white font-fun font-bold py-3 rounded-xl border-b-4 border-slate-950 transition">
+                    🏠 Menu Utama
+                </button>
+            </div>
+        </section>
+
+        <!-- SKRIN 4: CELEBRATE NAIK PANGKAT (RANK UP) -->
+        <section id="screen-rankup" class="hidden p-5 flex flex-col items-center text-center gap-4 animate-pop bg-gradient-to-b from-indigo-950/90 via-slate-900 to-slate-950">
+            <div class="relative">
+                <div class="w-24 h-24 rounded-full bg-amber-400/25 border-2 border-amber-400 flex items-center justify-center text-5xl animate-bounce shadow-lg shadow-amber-500/20">
+                    <span id="rankup-badge-icon">⚡</span>
+                </div>
+                <span class="absolute -top-1 -right-2 text-2xl animate-pulse">✨</span>
+                <span class="absolute -bottom-1 -left-2 text-2xl animate-pulse">🎉</span>
+            </div>
+
+            <div>
+                <span class="inline-block bg-amber-400/20 border border-amber-400/50 text-amber-300 text-[10px] font-bold uppercase tracking-widest px-3 py-0.5 rounded-full mb-1">
+                    🎊 TAHNIAH! NAIK PANGKAT 🎊
+                </span>
+                <h2 id="rankup-title" class="font-fun text-2xl sm:text-3xl font-bold text-white mt-1">
+                    KOPERAL ANGKASA
+                </h2>
+                <p id="rankup-desc" class="text-xs text-slate-300 mt-1">
+                    Sasaran bintang tercapai! Pangkat anda telah dinaikkan secara rasmi.
+                </p>
+            </div>
+
+            <div class="w-full bg-slate-950/80 border border-sky-400/30 rounded-2xl p-3.5 flex flex-col gap-2 text-xs">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Jumlah Bintang Terkumpul:</span>
+                    <strong id="rankup-total-stars" class="text-amber-300 font-fun">⭐ 20</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Sasaran Pangkat Seterusnya:</span>
+                    <strong id="rankup-next-target" class="text-sky-300 font-fun">🌟 Sarjan Angkasa (60 ⭐)</strong>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2.5 w-full mt-1">
+                <button onclick="continueAfterRankUp()" class="btn-3d w-full bg-gradient-to-r from-emerald-500 to-sky-500 hover:brightness-110 text-slate-950 font-fun font-bold py-3 rounded-xl border-b-4 border-emerald-800 transition flex items-center justify-center gap-2">
+                    <span>🚀</span>
+                    <span>Teruskan Misi ke Next Level</span>
+                </button>
+                <button onclick="saveAndExitRankUp()" class="btn-3d w-full bg-slate-800 hover:bg-slate-700 text-amber-300 font-fun font-bold py-3 rounded-xl border-b-4 border-slate-950 border border-amber-400/30 transition flex items-center justify-center gap-2">
+                    <span>💾</span>
+                    <span>Berhenti & Simpan Pangkat</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- MODAL PENGESAHAN RESET LEVEL -->
+        <div id="reset-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="w-full max-w-xs bg-slate-900 border-2 border-rose-500/40 rounded-3xl p-5 text-center shadow-2xl animate-pop flex flex-col gap-3">
+                <div class="w-14 h-14 mx-auto rounded-full bg-rose-500/20 border border-rose-400/40 flex items-center justify-center text-2xl">
+                    ⚠️
+                </div>
+                <div>
+                    <h3 class="font-fun text-lg font-bold text-white">Reset Semua Level?</h3>
+                    <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                        Semua bintang, pangkat, dan rekod Wave terbaik akan dipadam dan kembali semula ke <strong class="text-sky-300">Rekrut Angkasa</strong>.
+                    </p>
+                </div>
+                <div class="flex gap-2 mt-1">
+                    <button onclick="closeResetModal()" class="btn-3d flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-fun font-bold text-xs py-2.5 rounded-xl border-b-4 border-slate-950 transition">
+                        Batal
+                    </button>
+                    <button onclick="confirmResetLevel()" class="btn-3d flex-1 bg-rose-600 hover:bg-rose-500 text-white font-fun font-bold text-xs py-2.5 rounded-xl border-b-4 border-rose-900 transition">
+                        Ya, Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SKRIP UTAMA PERMAINAN -->
+    <script>
+        const TOPIC_META = {
+            tambah: { name: 'TAMBAH', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40' },
+            tolak: { name: 'TOLAK', color: 'bg-rose-500/20 text-rose-300 border-rose-400/40' },
+            darab: { name: 'DARAB', color: 'bg-amber-500/20 text-amber-300 border-amber-400/40' },
+            bahagi: { name: 'BAHAGI', color: 'bg-sky-500/20 text-sky-300 border-sky-400/40' },
+            pecahan: { name: 'PECAHAN', color: 'bg-purple-500/20 text-purple-300 border-purple-400/40' },
+            peratusan: { name: 'PERATUSAN', color: 'bg-teal-500/20 text-teal-300 border-teal-400/40' },
+            semua: { name: 'MISI CAMPURAN', color: 'bg-indigo-500/20 text-indigo-300 border-indigo-400/40' }
+        };
+
+        const ALIEN_TYPES = [
+            { name: 'Drakonix', color: '#f43f5e', eye: '#fb7185' },
+            { name: 'Blorgon Mech', color: '#a855f7', eye: '#c084fc' },
+            { name: 'Xenoid Drone', color: '#06b6d4', eye: '#22d3ee' },
+            { name: 'Nebula Beast', color: '#eab308', eye: '#facc15' }
+        ];
+
+        const RANKS = [
+            { name: 'REKRUT ANGKASA', icon: '🎖️', minStars: 0, nextStars: 20, nextName: 'Koperal Angkasa' },
+            { name: 'KOPERAL ANGKASA', icon: '⚡', minStars: 20, nextStars: 60, nextName: 'Sarjan Angkasa' },
+            { name: 'SARJAN ANGKASA', icon: '🌟', minStars: 60, nextStars: 120, nextName: 'Kapten Universe' },
+            { name: 'KAPTEN UNIVERSE', icon: '👑', minStars: 120, nextStars: null, nextName: 'Pangkat Tertinggi!' }
+        ];
+
+        function getRankInfo(stars) {
+            let currentIdx = 0;
+            for (let i = RANKS.length - 1; i >= 0; i--) {
+                if (stars >= RANKS[i].minStars) {
+                    currentIdx = i;
+                    break;
+                }
+            }
+            return { index: currentIdx, ...RANKS[currentIdx] };
+        }
+
+        let state = {
+            isPlaying: false,
+            soundEnabled: true,
+            difficulty: 'mudah',
+            topic: 'tambah',
+            wave: 1,
+            highWave: parseInt(localStorage.getItem('mmk_high_wave') || '1'),
+            totalStars: parseInt(localStorage.getItem('mmk_total_stars') || '0'),
+            topicBest: JSON.parse(localStorage.getItem('mmk_topic_best') || '{}'),
+            roundStars: 0,
+            score: 0,
+            heroHp: 100,
+            alienHp: 100,
+            alienMaxHp: 100,
+            qIndex: 0,
+            totalQ: 10,
+            currentQ: null,
+            timer: 15,
+            timerMax: 15,
+            timerInterval: null,
+            hintShown: false,
+            pendingWaveAfterRankUp: null
+        };
+
+        let battle = {
+            animId: null,
+            lasers: [],
+            particles: [],
+            shockwaves: [],
+            alienX: 280,
+            alienProgress: 0, // 0 = jauh di kanan, 1 = berlanggar dengan adiwira di kiri
+            hitFlashHero: 0,
+            hitFlashAlien: 0,
+            alienDefeated: false,
+            alienDefeatTimer: 0,
+            screenShake: 0
+        };
+
+        // Web Audio API Sound Generator
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSfx(type) {
+            if (!state.soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                const now = ctx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(450, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'laser') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(880, now);
+                    osc.frequency.exponentialRampToValueAtTime(120, now + 0.18);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.18);
+                    osc.start(now);
+                    osc.stop(now + 0.18);
+                } else if (type === 'hit') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.linearRampToValueAtTime(50, now + 0.25);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'win') {
+                    osc.type = 'sine';
+                    const notes = [440, 554, 659, 880];
+                    notes.forEach((freq, i) => {
+                        setTimeout(() => {
+                            if (!state.soundEnabled) return;
+                            const o = ctx.createOscillator();
+                            const g = ctx.createGain();
+                            o.connect(g);
+                            g.connect(ctx.destination);
+                            o.frequency.value = freq;
+                            g.gain.setValueAtTime(0.1, ctx.currentTime);
+                            g.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                            o.start();
+                            o.stop(ctx.currentTime + 0.2);
+                        }, i * 90);
+                    });
+                } else if (type === 'gameover') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.linearRampToValueAtTime(80, now + 0.6);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                } else if (type === 'monster_defeat') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(320, now);
+                    osc.frequency.exponentialRampToValueAtTime(45, now + 0.55);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.55);
+                    osc.start(now);
+                    osc.stop(now + 0.55);
+                } else if (type === 'rankup') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+                    notes.forEach((freq, i) => {
+                        setTimeout(() => {
+                            if (!state.soundEnabled) return;
+                            const o = ctx.createOscillator();
+                            const g = ctx.createGain();
+                            o.type = 'triangle';
+                            o.connect(g);
+                            g.connect(ctx.destination);
+                            o.frequency.value = freq;
+                            g.gain.setValueAtTime(0.14, ctx.currentTime);
+                            g.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.28);
+                            o.start();
+                            o.stop(ctx.currentTime + 0.28);
+                        }, i * 110);
+                    });
+                }
+            } catch (e) {
+                console.log('Audio disabled/restricted');
+            }
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            document.getElementById('sound-icon').textContent = state.soundEnabled ? '🔊' : '🔇';
+            playSfx('click');
+        }
+
+        function openResetModal() {
+            playSfx('click');
+            document.getElementById('reset-modal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            playSfx('click');
+            document.getElementById('reset-modal').classList.add('hidden');
+        }
+
+        function confirmResetLevel() {
+            playSfx('hit');
+            state.totalStars = 0;
+            state.highWave = 1;
+            state.topicBest = {};
+            state.roundStars = 0;
+            state.wave = 1;
+            state.pendingWaveAfterRankUp = null;
+
+            localStorage.removeItem('mmk_total_stars');
+            localStorage.removeItem('mmk_high_wave');
+            localStorage.removeItem('mmk_topic_best');
+
+            document.getElementById('reset-modal').classList.add('hidden');
+            goHome();
+        }
+
+        // Latar Belakang Angkasa Lobi
+        function initLobbySpaceBackground() {
+            const bgCanvas = document.getElementById('space-bg-canvas');
+            if (!bgCanvas) return;
+            const bgCtx = bgCanvas.getContext('2d');
+            let w = window.innerWidth;
+            let h = window.innerHeight;
+
+            function resizeBg() {
+                w = bgCanvas.width = window.innerWidth;
+                h = bgCanvas.height = window.innerHeight;
+            }
+            resizeBg();
+            window.addEventListener('resize', resizeBg);
+
+            const bgStars = Array.from({ length: 45 }, () => ({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                r: Math.random() * 1.5 + 0.3,
+                vy: Math.random() * 8 + 2,
+                alpha: Math.random() * 0.7 + 0.3
+            }));
+
+            let lastTime = performance.now();
+            function renderBg(now) {
+                const dt = Math.min((now - lastTime) / 1000, 0.1);
+                lastTime = now;
+                bgCtx.clearRect(0, 0, w, h);
+
+                bgStars.forEach(s => {
+                    s.y += s.vy * dt;
+                    if (s.y > h) { s.y = 0; s.x = Math.random() * w; }
+                    bgCtx.globalAlpha = s.alpha * (0.6 + 0.4 * Math.sin(now * 0.003 + s.x));
+                    bgCtx.fillStyle = '#e0f2fe';
+                    bgCtx.beginPath();
+                    bgCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                    bgCtx.fill();
+                });
+                bgCtx.globalAlpha = 1;
+                requestAnimationFrame(renderBg);
+            }
+            requestAnimationFrame(renderBg);
+        }
+
+        function updateLobbyHUD() {
+            document.getElementById('total-stars').textContent = state.totalStars;
+            document.getElementById('high-wave-hud').textContent = `Wave ${state.highWave}`;
+            
+            const rankInfo = getRankInfo(state.totalStars);
+            document.getElementById('player-rank').textContent = `${rankInfo.icon} ${rankInfo.name}`;
+
+            const nextLabel = document.getElementById('next-rank-label');
+            const progText = document.getElementById('rank-progress-text');
+            const progBar = document.getElementById('rank-progress-bar');
+
+            if (rankInfo.nextStars) {
+                const range = rankInfo.nextStars - rankInfo.minStars;
+                const current = state.totalStars - rankInfo.minStars;
+                const pct = Math.min(100, Math.round((current / range) * 100));
+                nextLabel.textContent = `Target: ${rankInfo.nextName.split(' ')[0]}`;
+                progText.textContent = `${state.totalStars}/${rankInfo.nextStars} ⭐`;
+                progBar.style.width = `${pct}%`;
+            } else {
+                nextLabel.textContent = 'Pangkat Maksimum';
+                progText.textContent = `${state.totalStars} ⭐`;
+                progBar.style.width = '100%';
+            }
+
+            Object.keys(TOPIC_META).forEach(key => {
+                const el = document.getElementById(`best-${key}`);
+                if (el) {
+                    const val = state.topicBest[key] || 0;
+                    el.textContent = `⭐ ${val}`;
+                }
+            });
+        }
+
+        initLobbySpaceBackground();
+        updateLobbyHUD();
+
+        function setDifficulty(level) {
+            playSfx('click');
+            state.difficulty = level;
+            const specs = {
+                mudah: { text: 'Musuh Perlahan', cls: 'text-[11px] font-semibold text-emerald-400' },
+                sederhana: { text: 'Musuh Sederhana', cls: 'text-[11px] font-semibold text-amber-400' },
+                sukar: { text: 'Musuh Laju!', cls: 'text-[11px] font-semibold text-rose-400' }
+            };
+
+            ['mudah', 'sederhana', 'sukar'].forEach(lvl => {
+                const btn = document.getElementById(`diff-${lvl}`);
+                btn.className = 'py-2 px-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold text-xs transition text-center';
+            });
+
+            const activeBtn = document.getElementById(`diff-${level}`);
+            activeBtn.className = 'py-2 px-2 rounded-xl ' + 
+                (level === 'mudah' ? 'bg-emerald-500 text-slate-950 shadow' : 
+                 level === 'sederhana' ? 'bg-amber-400 text-slate-950 shadow' : 'bg-rose-500 text-white shadow') + 
+                ' font-bold text-xs text-center';
+
+            document.getElementById('difficulty-spec').textContent = specs[level].text;
+            document.getElementById('difficulty-spec').className = specs[level].cls;
+        }
+
+        function showScreen(screenId) {
+            ['screen-home', 'screen-game', 'screen-end', 'screen-rankup'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function goHome() {
+            playSfx('click');
+            state.isPlaying = false;
+            if (battle.animId) cancelAnimationFrame(battle.animId);
+            if (state.timerInterval) clearInterval(state.timerInterval);
+            updateLobbyHUD();
+            showScreen('screen-home');
+        }
+
+        // Permainan & Soalan Matematik
+        function startGame(topicKey) {
+            playSfx('click');
+            state.topic = topicKey;
+            state.isPlaying = true;
+            state.wave = 1;
+            state.roundStars = 0;
+            state.qIndex = 0;
+            state.heroHp = 100;
+
+            const meta = TOPIC_META[topicKey];
+            const badge = document.getElementById('game-topic-badge');
+            badge.textContent = meta.name;
+            badge.className = 'px-2.5 py-0.5 rounded-full border ' + meta.color;
+
+            setupWave(1);
+            showScreen('screen-game');
+            initBattleCanvas();
+            nextQuestion();
+        }
+
+        function setupWave(waveNum) {
+            state.wave = waveNum;
+            if (waveNum > state.highWave) {
+                state.highWave = waveNum;
+                localStorage.setItem('mmk_high_wave', state.highWave);
+            }
+            document.getElementById('game-wave-text').textContent = `WAVE ${waveNum}`;
+            state.alienMaxHp = 100 + (waveNum - 1) * 25;
+            state.alienHp = state.alienMaxHp;
+            battle.alienProgress = 0; // Mula jauh di sebelah kanan
+            battle.lasers = [];
+            battle.particles = [];
+            battle.shockwaves = [];
+            battle.alienDefeated = false;
+            battle.alienDefeatTimer = 0;
+            
+            const alienInfo = ALIEN_TYPES[(waveNum - 1) % ALIEN_TYPES.length];
+            document.getElementById('alien-name-label').textContent = `👾 ${alienInfo.name}`;
+            updateHpBars();
+        }
+
+        function updateHpBars() {
+            document.getElementById('hero-hp-val').textContent = Math.max(0, state.heroHp);
+            document.getElementById('hero-hp-bar').style.width = Math.max(0, state.heroHp) + '%';
+            
+            const alienPct = Math.max(0, Math.round((state.alienHp / state.alienMaxHp) * 100));
+            document.getElementById('alien-hp-val').textContent = alienPct;
+            document.getElementById('alien-hp-bar').style.width = alienPct + '%';
+        }
+
+        function generateQuestion() {
+            let t = state.topic;
+            if (t === 'semua') {
+                const topics = ['tambah', 'tolak', 'darab', 'bahagi', 'pecahan', 'peratusan'];
+                t = topics[Math.floor(Math.random() * topics.length)];
+            }
+
+            let qText = '';
+            let ans = 0;
+            let hint = '';
+
+            if (t === 'tambah') {
+                const a = Math.floor(Math.random() * 50) + 10;
+                const b = Math.floor(Math.random() * 50) + 10;
+                ans = a + b;
+                qText = `${a} + ${b} = ?`;
+                hint = `Campurkan nilai sa (${a % 10} + ${b % 10}) dahulu, kemudian nilai puluh.`;
+            } else if (t === 'tolak') {
+                const a = Math.floor(Math.random() * 60) + 30;
+                const b = Math.floor(Math.random() * 25) + 5;
+                const realA = Math.max(a, b);
+                const realB = Math.min(a, b);
+                ans = realA - realB;
+                qText = `${realA} − ${realB} = ?`;
+                hint = `Kira ke belakang dari ${realA} sebanyak ${realB} langkah.`;
+            } else if (t === 'darab') {
+                const a = Math.floor(Math.random() * 9) + 2;
+                const b = Math.floor(Math.random() * 9) + 2;
+                ans = a * b;
+                qText = `${a} × ${b} = ?`;
+                hint = `Ingat semula sifir ${a} atau ${b}.`;
+            } else if (t === 'bahagi') {
+                const b = Math.floor(Math.random() * 8) + 2;
+                const multiplier = Math.floor(Math.random() * 9) + 2;
+                const a = b * multiplier;
+                ans = multiplier;
+                qText = `${a} ÷ ${b} = ?`;
+                hint = `Fikirkan nombor apa darab dengan ${b} jadi ${a}?`;
+            } else if (t === 'pecahan') {
+                const denoms = [2, 4, 5, 10];
+                const d = denoms[Math.floor(Math.random() * denoms.length)];
+                const numer = Math.floor(Math.random() * (d - 1)) + 1;
+                ans = numer;
+                qText = `Berapakah pengangka bagi pecahan setara dengan per ${d}?`;
+                hint = `Pengangka ialah nombor di bahagian atas pecahan.`;
+            } else { // peratusan
+                const vals = [10, 20, 25, 50, 75];
+                const pct = vals[Math.floor(Math.random() * vals.length)];
+                const base = [100, 200, 50.4][Math.floor(Math.random() * 3)] > 100 ? 200 : 100;
+                ans = (pct / 100) * base;
+                qText = `${pct}% daripada ${base} = ?`;
+                hint = `Tukar ${pct}% kepada pecahan atau darabkan terus dengan ${base}.`;
+            }
+
+            // Jana pilihan jawapan A B C D
+            let options = [ans];
+            while (options.length < 4) {
+                let offset = (Math.floor(Math.random() * 5) + 1) * (Math.random() < 0.5 ? 1 : -1);
+                let fake = ans + offset;
+                if (fake >= 0 && !options.includes(fake)) {
+                    options.push(fake);
+                }
+            }
+            options.sort(() => Math.random() - 0.5);
+            const correctIdx = options.indexOf(ans);
+
+            return { qText, ans, options, correctIdx, hint };
+        }
+
+        function nextQuestion() {
+            if (!state.isPlaying) return;
+            state.qIndex++;
+            if (state.qIndex > state.totalQ) {
+                // Selesai 1 Wave, naik Wave seterusnya!
+                state.wave++;
+                state.qIndex = 1;
+                setupWave(state.wave);
+            }
+
+            document.getElementById('q-counter').textContent = `${state.qIndex}/${state.totalQ}`;
+            state.currentQ = generateQuestion();
+            document.getElementById('question-text').textContent = state.currentQ.qText;
+
+            // Papar pilihan jawapan
+            state.currentQ.options.forEach((opt, i) => {
+                const btn = document.getElementById(`ans-${i}`);
+                btn.querySelector('.ans-val').textContent = opt;
+                btn.disabled = false;
+                btn.className = 'btn-3d bg-slate-900 hover:bg-slate-800 text-white font-fun font-bold text-base py-2.5 px-3 rounded-2xl border-b-4 border-slate-950 transition flex items-center justify-center';
+            });
+
+            // Tutup hint
+            state.hintShown = false;
+            document.getElementById('hint-box').classList.add('hidden');
+            document.getElementById('hint-text-label').textContent = 'Buka Tips & Hint';
+
+            resetTimer();
+        }
+
+        function resetTimer() {
+            if (state.timerInterval) clearInterval(state.timerInterval);
+            state.timerMax = state.difficulty === 'sukar' ? 10 : state.difficulty === 'sederhana' ? 14 : 18;
+            state.timer = state.timerMax;
+
+            state.timerInterval = setInterval(() => {
+                if (!state.isPlaying) return;
+                state.timer -= 0.1;
+                const pct = (state.timer / state.timerMax) * 100;
+                document.getElementById('timer-bar').style.width = Math.max(0, pct) + '%';
+
+                // Makhluk asing mara perlahan-lahan mendekati adiwira setiap saat
+                const speedMult = state.difficulty === 'sukar' ? 1.35 : state.difficulty === 'sederhana' ? 1.0 : 0.75;
+                battle.alienProgress += (0.1 / state.timerMax) * speedMult;
+
+                if (battle.alienProgress >= 0.75 && battle.alienProgress < 0.77) {
+                    showBattleMsg('⚠️ Amaran! Makhluk asing semakin hampir!', '#fbbf24');
+                }
+
+                // Jika terlalu lambat sehingga makhluk asing berlanggar dengan adiwira -> Game Over
+                if (battle.alienProgress >= 1) {
+                    clearInterval(state.timerInterval);
+                    playSfx('hit');
+                    state.heroHp = 0;
+                    updateHpBars();
+                    triggerShake();
+                    triggerGameOver('Terlalu lambat! Makhluk asing berjaya menangkap Kapten Universe!');
+                    return;
+                }
+
+                if (state.timer <= 0) {
+                    clearInterval(state.timerInterval);
+                    handleTimeOut();
+                }
+            }, 100);
+        }
+
+        function handleTimeOut() {
+            playSfx('hit');
+            state.heroHp -= 25;
+            updateHpBars();
+            triggerShake();
+            showBattleMsg('Masa tamat! Makhluk asing serang!', '#f43f5e');
+
+            if (state.heroHp <= 10) {
+                triggerGameOver('Kapal angkasa musnah!');
+            } else {
+                setTimeout(nextQuestion, 1200);
+            }
+        }
+
+        function toggleHint() {
+            playSfx('click');
+            state.hintShown = !state.hintShown;
+            const box = document.getElementById('hint-box');
+            const label = document.getElementById('hint-text-label');
+            if (state.hintShown) {
+                box.classList.remove('hidden');
+                document.getElementById('hint-content').textContent = state.currentQ.hint;
+                label.textContent = 'Tutup Tips';
+            } else {
+                box.classList.add('hidden');
+                label.textContent = 'Buka Tips & Hint';
+            }
+        }
+
+        function checkAnswer(selectedIndex) {
+            if (!state.isPlaying) return;
+            if (state.timerInterval) clearInterval(state.timerInterval);
+
+            // Nyahaktifkan butang sementara
+            for (let i = 0; i < 4; i++) {
+                document.getElementById(`ans-${i}`).disabled = true;
+            }
+
+            const isCorrect = (selectedIndex === state.currentQ.correctIdx);
+            const chosenBtn = document.getElementById(`ans-${selectedIndex}`);
+            const correctBtn = document.getElementById(`ans-${state.currentQ.correctIdx}`);
+
+            if (isCorrect) {
+                playSfx('laser');
+                chosenBtn.className = 'btn-3d bg-emerald-500 text-slate-950 font-fun font-bold text-base py-2.5 px-3 rounded-2xl border-b-4 border-emerald-700 flex items-center justify-center';
+                
+                const prevRank = getRankInfo(state.totalStars);
+                state.roundStars++;
+                state.totalStars++;
+                localStorage.setItem('mmk_total_stars', state.totalStars);
+                document.getElementById('game-round-stars').textContent = state.roundStars;
+                updateLobbyHUD();
+
+                const newRank = getRankInfo(state.totalStars);
+                const didRankUp = newRank.index > prevRank.index;
+
+                // Kurangkan HP musuh & tolak makhluk asing ke belakang (knockback)
+                const dmg = Math.round(state.alienMaxHp / 4);
+                state.alienHp -= dmg;
+                battle.alienProgress = Math.max(0, battle.alienProgress - 0.35);
+                updateHpBars();
+                triggerLaserEffect(true);
+                showBattleMsg('Tembakan tepat! Makhluk asing tercampak ke belakang!', '#38bdf8');
+
+                if (state.alienHp <= 0) {
+                    // Kesan khas raksasa dikalahkan!
+                    playSfx('monster_defeat');
+                    battle.alienDefeated = true;
+                    battle.alienDefeatTimer = 0;
+                    battle.screenShake = 0.6;
+                    const canvas = document.getElementById('battle-canvas');
+                    const defeatY = canvas ? canvas.height * 0.52 : 75;
+                    triggerMonsterDefeatEffect(battle.alienX, defeatY);
+                    showBattleMsg(`💥 RAKSASA MUSNAH! Wave ${state.wave} Ditawan!`, '#facc15');
+
+                    setTimeout(() => {
+                        if (didRankUp) {
+                            triggerRankUpCelebration(newRank, state.wave + 1);
+                        } else {
+                            playSfx('win');
+                            setupWave(state.wave + 1);
+                            nextQuestion();
+                        }
+                    }, 950);
+                    return;
+                }
+
+                if (didRankUp) {
+                    setTimeout(() => {
+                        triggerRankUpCelebration(newRank, state.wave);
+                    }, 550);
+                    return;
+                }
+            } else {
+                playSfx('hit');
+                chosenBtn.className = 'btn-3d bg-rose-600 text-white font-fun font-bold text-base py-2.5 px-3 rounded-2xl border-b-4 border-rose-950 flex items-center justify-center';
+                correctBtn.className = 'btn-3d bg-emerald-600 text-white font-fun font-bold text-base py-2.5 px-3 rounded-2xl border-b-4 border-emerald-950 flex items-center justify-center';
+
+                // Makhluk asing tembak balik & mara lebih dekat
+                state.heroHp -= 20;
+                battle.alienProgress = Math.min(0.95, battle.alienProgress + 0.18);
+                updateHpBars();
+                triggerShake();
+                triggerLaserEffect(false);
+                showBattleMsg('Salah! Makhluk asing menembak balas!', '#f43f5e');
+
+                if (state.heroHp <= 0) {
+                    triggerGameOver('Kapten Universe kehabisan tenaga!');
+                    return;
+                }
+            }
+
+            setTimeout(nextQuestion, isCorrect ? 450 : 850);
+        }
+
+        function showBattleMsg(text, color) {
+            const el = document.getElementById('battle-msg');
+            el.textContent = text;
+            el.style.color = color;
+            el.classList.add('scale-105');
+            setTimeout(() => el.classList.remove('scale-105'), 300);
+        }
+
+        function triggerShake() {
+            const wrap = document.getElementById('battle-arena-wrapper');
+            wrap.classList.add('animate-pulse');
+            setTimeout(() => wrap.classList.remove('animate-pulse'), 400);
+        }
+
+        function triggerLaserEffect(isHeroShoot) {
+            const canvas = document.getElementById('battle-canvas');
+            const heroGunX = 72;
+            const heroGunY = canvas ? canvas.height * 0.56 : 85;
+            const alienPosX = battle.alienX - 20;
+            const alienPosY = canvas ? canvas.height * 0.56 : 85;
+
+            battle.lasers.push({
+                x: isHeroShoot ? heroGunX : alienPosX,
+                y: isHeroShoot ? heroGunY : alienPosY,
+                targetX: isHeroShoot ? alienPosX : heroGunX,
+                targetY: isHeroShoot ? alienPosY : heroGunY,
+                color: isHeroShoot ? '#38bdf8' : '#f43f5e',
+                isHero: isHeroShoot,
+                progress: 0
+            });
+        }
+
+        function spawnExplosion(x, y, color) {
+            for (let i = 0; i < 14; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 90 + 30;
+                battle.particles.push({
+                    x, y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 1,
+                    color
+                });
+            }
+        }
+
+        function triggerMonsterDefeatEffect(x, y) {
+            const colors = ['#facc15', '#f43f5e', '#38bdf8', '#a855f7', '#ffffff'];
+            battle.shockwaves.push({ x, y, radius: 8, maxRadius: 115, alpha: 1, color: '#facc15' });
+            battle.shockwaves.push({ x, y, radius: 4, maxRadius: 80, alpha: 1, color: '#f43f5e' });
+            for (let i = 0; i < 42; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 160 + 40;
+                battle.particles.push({
+                    x, y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 1.4,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+        }
+
+        function triggerRankUpCelebration(newRank, nextWaveNum) {
+            state.isPlaying = false;
+            if (battle.animId) cancelAnimationFrame(battle.animId);
+            if (state.timerInterval) clearInterval(state.timerInterval);
+
+            state.pendingWaveAfterRankUp = nextWaveNum;
+
+            // Simpan rekod terbaik topik semasa
+            const prevBest = state.topicBest[state.topic] || 0;
+            if (state.roundStars > prevBest) {
+                state.topicBest[state.topic] = state.roundStars;
+                localStorage.setItem('mmk_topic_best', JSON.stringify(state.topicBest));
+            }
+            updateLobbyHUD();
+
+            playSfx('rankup');
+            document.getElementById('rankup-badge-icon').textContent = newRank.icon;
+            document.getElementById('rankup-title').textContent = newRank.name;
+            document.getElementById('rankup-total-stars').textContent = `⭐ ${state.totalStars}`;
+            document.getElementById('rankup-next-target').textContent = newRank.nextStars
+                ? `${newRank.nextName} (${newRank.nextStars} ⭐)`
+                : '👑 Pangkat Tertinggi Galaksi!';
+
+            showScreen('screen-rankup');
+        }
+
+        function continueAfterRankUp() {
+            playSfx('click');
+            state.isPlaying = true;
+            showScreen('screen-game');
+            initBattleCanvas();
+            if (state.pendingWaveAfterRankUp && state.pendingWaveAfterRankUp > state.wave) {
+                setupWave(state.pendingWaveAfterRankUp);
+            }
+            nextQuestion();
+        }
+
+        function saveAndExitRankUp() {
+            playSfx('click');
+            goHome();
+        }
+
+        function initBattleCanvas() {
+            const canvas = document.getElementById('battle-canvas');
+            const wrapper = document.getElementById('battle-arena-wrapper');
+            if (!canvas || !wrapper) return;
+            const ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                canvas.width = wrapper.clientWidth || 360;
+                canvas.height = wrapper.clientHeight || 160;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            let lastTime = performance.now();
+
+            function drawSuperhero(x, y, now, isHit) {
+                ctx.save();
+                ctx.translate(x, y + Math.sin(now * 0.008) * 3);
+
+                // Jubah merah berkibar
+                ctx.fillStyle = isHit ? '#ffffff' : '#ef4444';
+                ctx.beginPath();
+                ctx.moveTo(-6, -12);
+                ctx.quadraticCurveTo(-28, 2 + Math.sin(now * 0.015) * 6, -34, 24);
+                ctx.lineTo(-8, 18);
+                ctx.closePath();
+                ctx.fill();
+
+                // Kaki & But
+                ctx.fillStyle = isHit ? '#ffffff' : '#1d4ed8';
+                ctx.fillRect(-8, 12, 6, 16);
+                ctx.fillRect(2, 12, 6, 16);
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(-9, 24, 8, 5);
+                ctx.fillRect(2, 24, 8, 5);
+
+                // Badan Adiwira (Sut Biru)
+                ctx.fillStyle = isHit ? '#ffffff' : '#0284c7';
+                ctx.beginPath();
+                ctx.roundRect(-10, -12, 20, 25, 5);
+                ctx.fill();
+
+                // Lambang kilat kuning di dada
+                ctx.fillStyle = '#facc15';
+                ctx.beginPath();
+                ctx.moveTo(2, -8);
+                ctx.lineTo(-3, 0);
+                ctx.lineTo(1, 0);
+                ctx.lineTo(-2, 8);
+                ctx.lineTo(5, -1);
+                ctx.lineTo(1, -1);
+                ctx.closePath();
+                ctx.fill();
+
+                // Tangan & Meriam Tenaga Plasma di tangan kanan
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillRect(8, -8, 18, 7);
+                ctx.fillStyle = '#fef08a';
+                ctx.beginPath();
+                ctx.arc(27, -4.5, 4.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Kepala & Topeng Adiwira
+                ctx.fillStyle = '#fde68a';
+                ctx.beginPath();
+                ctx.arc(0, -21, 10, 0, Math.PI * 2);
+                ctx.fill();
+                // Topeng mata biru
+                ctx.fillStyle = '#1e3a8a';
+                ctx.fillRect(-9, -25, 19, 6);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(2, -24, 5, 3);
+
+                ctx.restore();
+            }
+
+            function drawAlienMonster(x, y, now, isHit, hpRatio) {
+                const alienInfo = ALIEN_TYPES[(state.wave - 1) % ALIEN_TYPES.length];
+                // Makin lemah HP, badan makhluk asing sedikit mengecut & bergetar
+                const scale = 0.78 + 0.22 * Math.max(0, hpRatio);
+                const wobble = hpRatio < 0.4 ? Math.sin(now * 0.05) * 3 : 0;
+
+                ctx.save();
+                ctx.translate(x + wobble, y + Math.cos(now * 0.007) * 4);
+                ctx.scale(scale, scale);
+
+                // Sesungut / Tanduk Makhluk Asing
+                ctx.strokeStyle = isHit ? '#ffffff' : alienInfo.color;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(-10, -24);
+                ctx.lineTo(-18, -38);
+                ctx.moveTo(10, -24);
+                ctx.lineTo(18, -38);
+                ctx.stroke();
+
+                ctx.fillStyle = '#facc15';
+                ctx.beginPath();
+                ctx.arc(-18, -38, 4, 0, Math.PI * 2);
+                ctx.arc(18, -38, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Badan Raksasa Makhluk Asing
+                ctx.fillStyle = isHit ? '#ffffff' : alienInfo.color;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 24, 28, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Lengan Cakar menghala ke kiri (Adiwira)
+                ctx.strokeStyle = isHit ? '#ffffff' : alienInfo.color;
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(-18, 2);
+                ctx.lineTo(-34, -4 + Math.sin(now * 0.012) * 4);
+                ctx.stroke();
+
+                // Mata Tunggal Raksasa (Cyclops)
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(-6, -8, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#0f172a';
+                ctx.beginPath();
+                ctx.arc(-9, -8, 4.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Mulut Bergigi Tajam
+                ctx.fillStyle = '#4c0519';
+                ctx.beginPath();
+                ctx.ellipse(-4, 12, 12, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.moveTo(-11, 7); ctx.lineTo(-8, 12); ctx.lineTo(-5, 7);
+                ctx.moveTo(-2, 7); ctx.lineTo(1, 12); ctx.lineTo(4, 7);
+                ctx.fill();
+
+                // Kaki Tentakel
+                ctx.fillStyle = isHit ? '#ffffff' : alienInfo.color;
+                ctx.fillRect(-16, 22, 8, 10);
+                ctx.fillRect(6, 22, 8, 10);
+
+                ctx.restore();
+            }
+
+            function renderBattle(now) {
+                if (!state.isPlaying) return;
+                const dt = Math.min((now - lastTime) / 1000, 0.1);
+                lastTime = now;
+
+                if (battle.hitFlashHero > 0) battle.hitFlashHero -= dt;
+                if (battle.hitFlashAlien > 0) battle.hitFlashAlien -= dt;
+                if (battle.screenShake > 0) battle.screenShake -= dt;
+                if (battle.alienDefeated) battle.alienDefeatTimer += dt;
+
+                ctx.save();
+                if (battle.screenShake > 0) {
+                    const mag = battle.screenShake * 10;
+                    ctx.translate((Math.random() - 0.5) * mag, (Math.random() - 0.5) * mag);
+                }
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Latar lantai planet & bintang
+                const groundY = canvas.height - 26;
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(0, groundY, canvas.width, 26);
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, groundY);
+                ctx.lineTo(canvas.width, groundY);
+                ctx.stroke();
+
+                // Bintang berkelip
+                ctx.fillStyle = '#ffffff';
+                for (let i = 0; i < 18; i++) {
+                    let px = (i * 47 + now * 0.015) % canvas.width;
+                    let py = (i * 23) % (groundY - 12);
+                    ctx.globalAlpha = 0.25 + 0.5 * Math.sin(now * 0.005 + i);
+                    ctx.fillRect(px, py, 2, 2);
+                }
+                ctx.globalAlpha = 1;
+
+                // Kedudukan Adiwira (Kiri)
+                const heroX = 48;
+                const characterY = groundY - 29;
+                drawSuperhero(heroX, characterY, now, battle.hitFlashHero > 0);
+
+                // Kedudukan Makhluk Asing (Kanan -> Mara ke Kiri mengikut masa)
+                const startX = canvas.width - 48;
+                const endX = heroX + 46;
+                battle.alienX = startX - (startX - endX) * Math.min(1, battle.alienProgress);
+                const hpRatio = state.alienHp / state.alienMaxHp;
+
+                if (!battle.alienDefeated) {
+                    drawAlienMonster(battle.alienX, characterY - 3, now, battle.hitFlashAlien > 0, hpRatio);
+                } else if (battle.alienDefeatTimer < 0.7) {
+                    // Animasi raksasa berputar, mengecut & pudar sebelum meletup hilang
+                    const fade = Math.max(0, 1 - battle.alienDefeatTimer / 0.7);
+                    ctx.save();
+                    ctx.translate(battle.alienX, characterY - 3 - battle.alienDefeatTimer * 25);
+                    ctx.rotate(battle.alienDefeatTimer * 14);
+                    ctx.scale(fade, fade);
+                    ctx.globalAlpha = fade;
+                    drawAlienMonster(0, 0, now, true, 0.2);
+                    ctx.restore();
+                }
+
+                // Gelombang kejutan letupan raksasa (Shockwaves)
+                for (let i = battle.shockwaves.length - 1; i >= 0; i--) {
+                    const sw = battle.shockwaves[i];
+                    sw.radius += dt * 160;
+                    sw.alpha -= dt * 1.4;
+                    if (sw.alpha <= 0) {
+                        battle.shockwaves.splice(i, 1);
+                        continue;
+                    }
+                    ctx.save();
+                    ctx.globalAlpha = sw.alpha;
+                    ctx.strokeStyle = sw.color;
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                // Render tembakan laser & bola plasma
+                for (let idx = battle.lasers.length - 1; idx >= 0; idx--) {
+                    const l = battle.lasers[idx];
+                    l.progress += dt * 4.2;
+                    let curX = l.x + (l.targetX - l.x) * l.progress;
+                    let curY = l.y + (l.targetY - l.y) * l.progress;
+
+                    ctx.strokeStyle = l.color;
+                    ctx.lineWidth = 5;
+                    ctx.lineCap = 'round';
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = l.color;
+                    ctx.beginPath();
+                    ctx.moveTo(curX - (l.isHero ? 18 : -18), curY);
+                    ctx.lineTo(curX, curY);
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+
+                    if (l.progress >= 1) {
+                        spawnExplosion(l.targetX, l.targetY, l.color);
+                        if (l.isHero) battle.hitFlashAlien = 0.18;
+                        else battle.hitFlashHero = 0.18;
+                        battle.lasers.splice(idx, 1);
+                    }
+                }
+
+                // Render zarah letupan
+                for (let i = battle.particles.length - 1; i >= 0; i--) {
+                    const p = battle.particles[i];
+                    p.x += p.vx * dt;
+                    p.y += p.vy * dt;
+                    p.life -= dt * 2.5;
+                    if (p.life <= 0) {
+                        battle.particles.splice(i, 1);
+                        continue;
+                    }
+                    ctx.globalAlpha = p.life;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+                ctx.restore();
+
+                battle.animId = requestAnimationFrame(renderBattle);
+            }
+            battle.animId = requestAnimationFrame(renderBattle);
+        }
+
+        function triggerGameOver(reason) {
+            if (!state.isPlaying) return;
+            state.isPlaying = false;
+            if (battle.animId) cancelAnimationFrame(battle.animId);
+            if (state.timerInterval) clearInterval(state.timerInterval);
+
+            const prevBest = state.topicBest[state.topic] || 0;
+            if (state.roundStars > prevBest) {
+                state.topicBest[state.topic] = state.roundStars;
+                localStorage.setItem('mmk_topic_best', JSON.stringify(state.topicBest));
+            }
+            updateLobbyHUD();
+
+            playSfx('gameover');
+            document.getElementById('end-title').textContent = 'MISI TAMAT';
+            document.getElementById('end-subtitle').textContent = reason;
+            document.getElementById('end-wave').textContent = `Wave ${state.wave}`;
+            document.getElementById('end-stars').textContent = `⭐ ${state.roundStars}`;
+            showScreen('screen-end');
+        }
+
+        function restartGame() {
+            startGame(state.topic);
+        }
+    </script>
+</body>
+</html>
